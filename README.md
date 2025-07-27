@@ -4,10 +4,11 @@ This repository contains my personal notes and code from a crash course on the M
 
 ---
 
-## 📚 Learning Resources
+## 📚 Resources
 
 - **Official MCP Documentation**: [https://modelcontextprotocol.io/docs/getting-started/intro](https://modelcontextprotocol.io/docs/getting-started/intro)
 - **YouTube Tutorial**: [https://www.youtube.com/watch?v=ZoZxQwp1PiM&list=PLwUFQpzS-tRJHwT-qaI90vl-OLQcZz2Ck&index=27&t=127s](https://www.youtube.com/watch?v=ZoZxQwp1PiM&list=PLwUFQpzS-tRJHwT-qaI90vl-OLQcZz2Ck&index=27&t=127s)
+- **Tutorial Repository**: [https://github.com/WebDevSimplified/mcp-server-and-client](https://github.com/WebDevSimplified/mcp-server-and-client)
 
 ---
 
@@ -43,4 +44,4 @@ My primary goal is to gain a solid understanding of MCP and its practical applic
 
 ## 🚀 How to Use This Repository
 
-This repository is for my personal learning and may not be a comprehensive guide. 
+This repository is for my personal learning and may not be a comprehensive guide.
