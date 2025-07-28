@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import fs from "node:fs/promises";
+import path from "node:path";
 
 // Creates an MCP server
 const server = new McpServer({
@@ -62,14 +63,20 @@ async function createUser(user: {
   address: string;
   phone: string;
 }) {
-  const users = await import("./data/users.json", {
-    with: { type: "json" },
-  }).then((m) => m.default);
+  try {
+    const usersFilePath = path.join(__dirname, "data", "users.json");
+    const usersData = await fs.readFile(usersFilePath, "utf-8");
+    const users = JSON.parse(usersData);
 
-  const id = users.length + 1;
-  users.push({ id, ...user });
-  await fs.writeFile("./src/data/users.json", JSON.stringify(users, null, 2));
-  return id;
+    const id = users.length + 1;
+    users.push({ id, ...user });
+
+    await fs.writeFile(usersFilePath, JSON.stringify(users, null, 2));
+    return id;
+  } catch (error) {
+    console.error("Error in createUser:", error);
+    throw error;
+  }
 }
 
 // Run server

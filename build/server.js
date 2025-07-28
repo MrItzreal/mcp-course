@@ -7,6 +7,7 @@ const mcp_js_1 = require("@modelcontextprotocol/sdk/server/mcp.js");
 const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
 const zod_1 = require("zod");
 const promises_1 = __importDefault(require("node:fs/promises"));
+const node_path_1 = __importDefault(require("node:path"));
 // Creates an MCP server
 const server = new mcp_js_1.McpServer({
     name: "mcp-tutorial",
@@ -54,13 +55,19 @@ server.tool("create-user", "Create a new user in the database", {
 });
 // Create new user
 async function createUser(user) {
-    const users = await import("./data/users.json", {
-        with: { type: "json" },
-    }).then((m) => m.default);
-    const id = users.length + 1;
-    users.push({ id, ...user });
-    await promises_1.default.writeFile("./src/data/users.json", JSON.stringify(users, null, 2));
-    return id;
+    try {
+        const usersFilePath = node_path_1.default.join(__dirname, "data", "users.json");
+        const usersData = await promises_1.default.readFile(usersFilePath, "utf-8");
+        const users = JSON.parse(usersData);
+        const id = users.length + 1;
+        users.push({ id, ...user });
+        await promises_1.default.writeFile(usersFilePath, JSON.stringify(users, null, 2));
+        return id;
+    }
+    catch (error) {
+        console.error("Error in createUser:", error);
+        throw error;
+    }
 }
 // Run server
 async function main() {
