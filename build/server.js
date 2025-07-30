@@ -12,19 +12,8 @@ const server = new mcp_js_1.McpServer({
     name: "mcp-tutorial",
     version: "1.0.0",
     capabilities: {
-        resources: {
-            users: {
-                title: "Users",
-                description: "Get all users data from the database",
-                uriScheme: "users",
-            },
-        },
-        tools: {
-            "create-user": {
-                title: "Create User",
-                description: "Create a new user in the database",
-            },
-        },
+        resources: {},
+        tools: {},
         prompts: {},
     },
 });
@@ -42,6 +31,37 @@ server.resource("users", "users://all", {
             {
                 uri: uri.href,
                 text: JSON.stringify(users),
+                mimeType: "application/json",
+            },
+        ],
+    };
+});
+// Resource Template config
+server.resource("user-details", new mcp_js_1.ResourceTemplate("users://${userId}/profile", { list: undefined }), {
+    description: "Get a user's details from the database",
+    title: "User Details",
+    mimeType: "application/json",
+}, async (uri, { userId }) => {
+    const users = await import("./data/users.json", {
+        with: { type: "json" },
+    }).then((m) => m.default);
+    const user = users.find((u) => u.id === parseInt(userId));
+    if (user == null) {
+        return {
+            contents: [
+                {
+                    uri: uri.href,
+                    text: JSON.stringify({ error: "User not found" }),
+                    mimeType: "application/json",
+                },
+            ],
+        };
+    }
+    return {
+        contents: [
+            {
+                uri: uri.href,
+                text: JSON.stringify(user),
                 mimeType: "application/json",
             },
         ],
