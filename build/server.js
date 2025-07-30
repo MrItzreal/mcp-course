@@ -7,16 +7,45 @@ const mcp_js_1 = require("@modelcontextprotocol/sdk/server/mcp.js");
 const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
 const zod_1 = require("zod");
 const promises_1 = __importDefault(require("node:fs/promises"));
-const node_path_1 = __importDefault(require("node:path"));
 // Creates an MCP server
 const server = new mcp_js_1.McpServer({
     name: "mcp-tutorial",
     version: "1.0.0",
     capabilities: {
-        resources: {},
-        tools: {},
+        resources: {
+            users: {
+                title: "Users",
+                description: "Get all users data from the database",
+                uriScheme: "users",
+            },
+        },
+        tools: {
+            "create-user": {
+                title: "Create User",
+                description: "Create a new user in the database",
+            },
+        },
         prompts: {},
     },
+});
+// Resource config
+server.resource("users", "users://all", {
+    description: "Get all users data from the database",
+    title: "Users",
+    mimeType: "application/json",
+}, async (uri) => {
+    const users = await import("./data/users.json", {
+        with: { type: "json" },
+    }).then((m) => m.default);
+    return {
+        contents: [
+            {
+                uri: uri.href,
+                text: JSON.stringify(users),
+                mimeType: "application/json",
+            },
+        ],
+    };
 });
 // Tool config
 server.tool("create-user", "Create a new user in the database", {
@@ -34,40 +63,24 @@ server.tool("create-user", "Create a new user in the database", {
     try {
         const id = await createUser(params);
         return {
-            content: [
-                {
-                    type: "text",
-                    text: `User ${id} created successfully`,
-                },
-            ],
+            content: [{ type: "text", text: `User ${id} created successfully` }],
         };
     }
     catch {
         return {
-            content: [
-                {
-                    type: "text",
-                    text: "Failed to save user",
-                },
-            ],
+            content: [{ type: "text", text: "Failed to save user" }],
         };
     }
 });
 // Create new user
 async function createUser(user) {
-    try {
-        const usersFilePath = node_path_1.default.join(__dirname, "data", "users.json");
-        const usersData = await promises_1.default.readFile(usersFilePath, "utf-8");
-        const users = JSON.parse(usersData);
-        const id = users.length + 1;
-        users.push({ id, ...user });
-        await promises_1.default.writeFile(usersFilePath, JSON.stringify(users, null, 2));
-        return id;
-    }
-    catch (error) {
-        console.error("Error in createUser:", error);
-        throw error;
-    }
+    const users = await import("./data/users.json", {
+        with: { type: "json" },
+    }).then((m) => m.default);
+    const id = users.length + 1;
+    users.push({ id, ...user });
+    await promises_1.default.writeFile("./src/data/users.json", JSON.stringify(users, null, 2));
+    return id;
 }
 // Run server
 async function main() {

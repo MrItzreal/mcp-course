@@ -22,79 +22,16 @@
   },
   {
     "id": 4,
-    "name": "Izzy",
-    "email": "fake@mail.com",
-    "address": "230 Fake St",
-    "phone": "9998887654"
+    "name": "Kyle",
+    "email": "test@test.com",
+    "address": "sdasdasdsa",
+    "phone": "8172312875"
   },
   {
     "id": 5,
-    "name": "SYP",
-    "email": "syp@mail.com",
-    "address": "983 SYP St",
-    "phone": "897-000-0000"
-  },
-  {
-    "id": 6,
-    "name": "aaa",
-    "email": "aaa@mail.com",
-    "address": "222 AAA St",
-    "phone": "818-000-2389"
-  },
-  {
-    "id": 7,
-    "name": "bbb",
-    "email": "bbb@mail.com",
-    "address": "222 BBB St",
-    "phone": "000-000-0000"
-  },
-  {
-    "id": 8,
-    "name": "ccc",
-    "email": "ccc@mail.com",
-    "address": "222 CCC St",
-    "phone": "000-000-0000"
-  },
-  {
-    "id": 9,
-    "name": "ddd",
-    "email": "ddd@mail.com",
-    "address": "222 DDD St",
-    "phone": "000-000-0000"
-  },
-  {
-    "id": 10,
-    "name": "eee",
-    "email": "eee@mail.com",
-    "address": "222 EEE St",
-    "phone": "000-000-0000"
-  },
-  {
-    "id": 11,
-    "name": "fff",
-    "email": "fff@mail.com",
-    "address": "222 FFF St",
-    "phone": "000-000-0000"
-  },
-  {
-    "id": 12,
-    "name": "ggg",
-    "email": "ggg@mail.com",
-    "address": "222 GGG St",
-    "phone": "000-000-0000"
-  },
-  {
-    "id": 13,
-    "name": "hhh",
-    "email": "hhh@mail.com",
-    "address": "222 HHH St",
-    "phone": "000-000-0000"
-  },
-  {
-    "id": 14,
-    "name": "iii",
-    "email": "iii@mail.com",
-    "address": "222 III St",
-    "phone": "000-000-0000"
+    "name": "Jane Doe",
+    "email": "jane.doe@test.com",
+    "address": "789 Pine St, Anytown, USA",
+    "phone": "555-9876"
   }
 ]
