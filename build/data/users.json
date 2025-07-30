@@ -47,5 +47,12 @@
         "email": "emily.davis@example.com",
         "address": "123 Main Street, Anytown, USA",
         "phone": "+1-555-123-4567"
+    },
+    {
+        "id": 8,
+        "name": "Izzy",
+        "email": "izzy@example.com",
+        "address": "789 Sunset Blvd, Los Angeles, CA",
+        "phone": "+1-555-987-6543"
     }
 ]

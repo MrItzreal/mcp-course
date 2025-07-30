@@ -5,7 +5,6 @@ import {
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import fs from "node:fs/promises";
-import { error } from "node:console";
 
 // Creates an MCP server
 const server = new McpServer({
@@ -111,6 +110,26 @@ server.tool(
         content: [{ type: "text", text: "Failed to save user" }],
       };
     }
+  }
+);
+
+// Prompt config
+server.prompt(
+  "generate-fake-user",
+  "Generate a fake user based on a given name",
+  { name: z.string() },
+  ({ name }) => {
+    return {
+      messages: [
+        {
+          role: "user",
+          content: {
+            type: "text",
+            text: `Generate a fake user with the name ${name}. The user should have a realistic email, address, and phone number.`,
+          },
+        },
+      ],
+    };
   }
 );
 

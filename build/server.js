@@ -92,6 +92,20 @@ server.tool("create-user", "Create a new user in the database", {
         };
     }
 });
+// Prompt config
+server.prompt("generate-fake-user", "Generate a fake user based on a given name", { name: zod_1.z.string() }, ({ name }) => {
+    return {
+        messages: [
+            {
+                role: "user",
+                content: {
+                    type: "text",
+                    text: `Generate a fake user with the name ${name}. The user should have a realistic email, address, and phone number.`,
+                },
+            },
+        ],
+    };
+});
 // Create new user
 async function createUser(user) {
     const users = await import("./data/users.json", {
