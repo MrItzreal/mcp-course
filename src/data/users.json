@@ -54,5 +54,12 @@
     "email": "izzy@example.com",
     "address": "789 Sunset Blvd, Los Angeles, CA",
     "phone": "+1-555-987-6543"
+  },
+  {
+    "id": 9,
+    "name": "Jessica Ramirez",
+    "email": "jessica.ramirez82@gmail.com",
+    "address": "1427 Willow Creek Dr, Austin, TX 78745",
+    "phone": "(512) 555-3482"
   }
 ]
