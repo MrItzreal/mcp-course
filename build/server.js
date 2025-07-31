@@ -115,7 +115,9 @@ server.tool("create-random-user", "Create a random user with fake data", {
             ],
             maxTokens: 1024,
         },
-    }, types_js_1.CreateMessageResultSchema);
+    }, 
+    // Specifies what the result of the request shold be.
+    types_js_1.CreateMessageResultSchema);
     if (res.content.type !== "text") {
         return {
             content: [{ type: "text", text: "Failed to generate user data" }],

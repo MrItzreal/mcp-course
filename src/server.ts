@@ -142,6 +142,7 @@ server.tool(
           maxTokens: 1024,
         },
       },
+      // Specifies what the result of the request shold be.
       CreateMessageResultSchema
     );
 
