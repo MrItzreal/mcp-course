@@ -40,7 +40,7 @@ async function main() {
     switch (option) {
       case "Tools":
         const toolName = await select({
-          message: "Select a tool",
+          message: "Select a Tool",
           choices: tools.map((tool) => ({
             name: tool.annotations?.title || tool.name,
             value: tool.name,
@@ -52,6 +52,33 @@ async function main() {
           console.error("Tool not found", error);
         } else {
           await handleTool(tool);
+        }
+        break;
+
+      case "Resources":
+        const resourceUri = await select({
+          message: "Select a Resource",
+          choices: [
+            ...resources.map((resource) => ({
+              name: resource.name,
+              value: resource.uri,
+              description: resource.description,
+            })),
+            ...resourceTemplates.map((template) => ({
+              name: template.name,
+              value: template.uriTemplate,
+              description: template.description,
+            })),
+          ],
+        });
+        const uri =
+          resources.find((r) => r.uri === resourceUri)?.uri ??
+          resourceTemplates.find((r) => r.uriTemplate === resourceUri)
+            ?.uriTemplate;
+        if (uri == null) {
+          console.error("Resource not found", error);
+        } else {
+          await handleResource(uri);
         }
         break;
     }
@@ -75,6 +102,32 @@ async function handleTool(tool: Tool) {
     arguments: args,
   });
   console.log((res.content as [{ text: string }])[0].text);
+}
+
+async function handleResource(uri: string) {
+  // uri can have dynamic params that can be replaced
+  let finalUri = uri;
+
+  // Matches texts within {}
+  const paramMatches = uri.match(/{([^}]+)}/g);
+
+  if (paramMatches != null) {
+    for (const paramMatch of paramMatches) {
+      const paramName = paramMatch.replace("{", "").replace("}", "");
+      const paramValue = await input({
+        message: `Enter value for ${paramName}:`,
+      });
+      finalUri = finalUri.replace(paramMatch, paramValue);
+    }
+  }
+
+  const res = await mcp.readResource({
+    uri: finalUri,
+  });
+
+  console.log(
+    JSON.stringify(JSON.parse(res.contents[0].text as string), null, 2)
+  );
 }
 
 main();
