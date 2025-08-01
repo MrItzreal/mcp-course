@@ -1,8 +1,14 @@
-import { input, select } from "@inquirer/prompts";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { confirm, input, select } from "@inquirer/prompts";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { Tool } from "@modelcontextprotocol/sdk/types.js";
-import { error } from "node:console";
+import {
+  Prompt,
+  PromptMessage,
+  Tool,
+} from "@modelcontextprotocol/sdk/types.js";
+import { generateText } from "ai";
+process.loadEnvFile();
 
 // Creates an MCP client
 const mcp = new Client(
@@ -17,6 +23,11 @@ const transport = new StdioClientTransport({
   command: "node",
   args: ["build/server.js"],
   stderr: "ignore", // blocks server errors from showing in client.
+});
+
+// Init for Gemini w/ API key:
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
 async function main() {
@@ -49,12 +60,11 @@ async function main() {
         });
         const tool = tools.find((t) => t.name === toolName);
         if (tool == null) {
-          console.error("Tool not found", error);
+          console.error("Tool not found");
         } else {
           await handleTool(tool);
         }
         break;
-
       case "Resources":
         const resourceUri = await select({
           message: "Select a Resource",
@@ -76,9 +86,25 @@ async function main() {
           resourceTemplates.find((r) => r.uriTemplate === resourceUri)
             ?.uriTemplate;
         if (uri == null) {
-          console.error("Resource not found", error);
+          console.error("Resource not found");
         } else {
           await handleResource(uri);
+        }
+        break;
+      case "Prompts":
+        const promptName = await select({
+          message: "Select a Prompt",
+          choices: prompts.map((prompt) => ({
+            name: prompt.name,
+            value: prompt.name,
+            description: prompt.description,
+          })),
+        });
+        const prompt = prompts.find((p) => p.name === promptName);
+        if (prompt == null) {
+          console.error("Prompt not found.");
+        } else {
+          await handlePrompt(prompt);
         }
         break;
     }
@@ -128,6 +154,46 @@ async function handleResource(uri: string) {
   console.log(
     JSON.stringify(JSON.parse(res.contents[0].text as string), null, 2)
   );
+}
+
+async function handlePrompt(prompt: Prompt) {
+  // 1- Loops through each param defined in the server:
+  const args: Record<string, string> = {};
+  for (const arg of prompt.arguments ?? []) {
+    // 2- Asks user for input: 'argument name':
+    args[arg.name] = await input({
+      message: `Enter value for ${arg.name}`,
+    });
+  }
+
+  const res = await mcp.getPrompt({
+    name: prompt.name,
+    arguments: args,
+  });
+
+  for (const message of res.messages) {
+    console.log(await handleServerMessagePrompt(message));
+  }
+}
+
+async function handleServerMessagePrompt(message: PromptMessage) {
+  if (message.content.type !== "text") return;
+
+  console.log(message.content.text);
+  const run = await confirm({
+    message: "Do you want to run the above prompt?",
+    default: true, // "true" since most devs will want to run the prompt,
+  });
+
+  if (!run) return;
+
+  // Generate text w/ Gemini:
+  const { text } = await generateText({
+    model: google("gemini-2.0-flash"),
+    prompt: message.content.text,
+  });
+
+  return text;
 }
 
 main();

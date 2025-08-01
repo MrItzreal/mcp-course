@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const google_1 = require("@ai-sdk/google");
 const prompts_1 = require("@inquirer/prompts");
 const index_js_1 = require("@modelcontextprotocol/sdk/client/index.js");
 const stdio_js_1 = require("@modelcontextprotocol/sdk/client/stdio.js");
-const node_console_1 = require("node:console");
+const ai_1 = require("ai");
+process.loadEnvFile();
 // Creates an MCP client
 const mcp = new index_js_1.Client({
     name: "mcp-client-tutorial",
@@ -13,6 +15,10 @@ const transport = new stdio_js_1.StdioClientTransport({
     command: "node",
     args: ["build/server.js"],
     stderr: "ignore", // blocks server errors from showing in client.
+});
+// Init for Gemini w/ API key:
+const google = (0, google_1.createGoogleGenerativeAI)({
+    apiKey: process.env.GEMINI_API_KEY,
 });
 async function main() {
     await mcp.connect(transport);
@@ -41,7 +47,7 @@ async function main() {
                 });
                 const tool = tools.find((t) => t.name === toolName);
                 if (tool == null) {
-                    console.error("Tool not found", node_console_1.error);
+                    console.error("Tool not found");
                 }
                 else {
                     await handleTool(tool);
@@ -67,10 +73,27 @@ async function main() {
                     resourceTemplates.find((r) => r.uriTemplate === resourceUri)
                         ?.uriTemplate;
                 if (uri == null) {
-                    console.error("Resource not found", node_console_1.error);
+                    console.error("Resource not found");
                 }
                 else {
                     await handleResource(uri);
+                }
+                break;
+            case "Prompts":
+                const promptName = await (0, prompts_1.select)({
+                    message: "Select a Prompt",
+                    choices: prompts.map((prompt) => ({
+                        name: prompt.name,
+                        value: prompt.name,
+                        description: prompt.description,
+                    })),
+                });
+                const prompt = prompts.find((p) => p.name === promptName);
+                if (prompt == null) {
+                    console.error("Prompt not found.");
+                }
+                else {
+                    await handlePrompt(prompt);
                 }
                 break;
         }
@@ -109,6 +132,40 @@ async function handleResource(uri) {
         uri: finalUri,
     });
     console.log(JSON.stringify(JSON.parse(res.contents[0].text), null, 2));
+}
+async function handlePrompt(prompt) {
+    // 1- Loops through each param defined in the server:
+    const args = {};
+    for (const arg of prompt.arguments ?? []) {
+        // 2- Asks user for input: 'argument name':
+        args[arg.name] = await (0, prompts_1.input)({
+            message: `Enter value for ${arg.name}`,
+        });
+    }
+    const res = await mcp.getPrompt({
+        name: prompt.name,
+        arguments: args,
+    });
+    for (const message of res.messages) {
+        console.log(await handleServerMessagePrompt(message));
+    }
+}
+async function handleServerMessagePrompt(message) {
+    if (message.content.type !== "text")
+        return;
+    console.log(message.content.text);
+    const run = await (0, prompts_1.confirm)({
+        message: "Do you want to run the above prompt?",
+        default: true, // "true" since most devs will want to run the prompt,
+    });
+    if (!run)
+        return;
+    // Generate text w/ Gemini:
+    const { text } = await (0, ai_1.generateText)({
+        model: google("gemini-2.0-flash"),
+        prompt: message.content.text,
+    });
+    return text;
 }
 main();
 /*
