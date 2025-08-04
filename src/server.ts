@@ -103,6 +103,7 @@ server.tool(
   async (params) => {
     try {
       const id = await createUser(params);
+
       return {
         content: [{ type: "text", text: `User ${id} created successfully` }],
       };
@@ -142,7 +143,7 @@ server.tool(
           maxTokens: 1024,
         },
       },
-      // Specifies what the result of the request shold be.
+      // Specifies what the result of the request should be.
       CreateMessageResultSchema
     );
 
@@ -167,7 +168,7 @@ server.tool(
       };
     } catch {
       return {
-        content: [{ type: "text", text: "Failed to save user" }],
+        content: [{ type: "text", text: "Failed to generate user data" }],
       };
     }
   }

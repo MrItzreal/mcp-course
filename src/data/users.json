@@ -68,5 +68,74 @@
     "email": "mail@mail.com",
     "address": "123 Fake St",
     "phone": "202-020-1234"
+  },
+  {
+    "id": 11,
+    "name": "Steven",
+    "email": "mail@mail.com",
+    "address": "Fake St",
+    "phone": "000-999-0212"
+  },
+  {
+    "id": 12,
+    "name": "Vscode",
+    "email": "mail@mail.com",
+    "address": "Fake St",
+    "phone": "000-000-2022"
+  },
+  {
+    "id": 13,
+    "name": "Pokemon",
+    "email": "mail@mail.com",
+    "address": "Fake st",
+    "phone": "23472394732"
+  },
+  {
+    "id": 14,
+    "name": "Jessica Ramirez",
+    "email": "jessica.ramirez82@gmail.com",
+    "address": "1842 Willowbrook Lane, Austin, TX 78741",
+    "phone": "(512) 555-2387"
+  },
+  {
+    "id": 15,
+    "name": "Trevor",
+    "email": "fake@fake.com",
+    "address": "Fake 123 St",
+    "phone": "030-304-0402"
+  },
+  {
+    "id": 16,
+    "name": "Lola",
+    "email": "mlas@mail.com",
+    "address": "asasas",
+    "phone": "asas223e3\\"
+  },
+  {
+    "id": 17,
+    "name": "Aaaaaaa",
+    "email": "mail@mail.com",
+    "address": "Fake Ave",
+    "phone": "123214"
+  },
+  {
+    "id": 18,
+    "name": "Jessica M. Carter",
+    "email": "jessica.carter82@gmail.com",
+    "address": "1842 Willowbrook Lane, Apt 5B, Columbus, OH 43215",
+    "phone": "(614) 555-2378"
+  },
+  {
+    "id": 19,
+    "firstName": "Eleanor",
+    "lastName": "Vance",
+    "email": "eleanor.vance77@example.com",
+    "address": {
+      "street": "472 Willow Creek Drive",
+      "city": "Ashland",
+      "state": "Oregon",
+      "zipCode": "97520"
+    },
+    "phoneNumber": "541-555-3876"
   }
 ]
