@@ -194,19 +194,49 @@ server.prompt(
   }
 );
 
-// Create new user
-async function createUser(user: {
+// Normalize data when random users are created:
+function normalizeUser(user: any): {
   name: string;
   email: string;
   address: string;
   phone: string;
+} {
+  let name = user.name;
+  if (!name && user.firstName && user.lastName) {
+    name = `${user.firstName} ${user.lastName}`;
+  }
+
+  let address = user.address;
+  if (typeof address === "object" && address !== null) {
+    address = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`;
+  }
+
+  let phone = user.phone || user.phoneNumber;
+  return {
+    name: name || "",
+    email: user.email || "",
+    address: address || "",
+    phone: phone || "",
+  };
+}
+
+// Create new user
+async function createUser(user: {
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  address: string | object;
+  phone?: string;
+  phoneNumber?: string;
 }) {
   const users = await import("./data/users.json", {
     with: { type: "json" },
   }).then((m) => m.default);
 
   const id = users.length + 1;
-  users.push({ id, ...user });
+  const normalizedUser = normalizeUser(user);
+  users.push({ id, ...normalizedUser });
   await fs.writeFile(
     "./src/usermcp/data/users.json",
     JSON.stringify(users, null, 2)
