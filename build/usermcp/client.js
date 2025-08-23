@@ -14,7 +14,7 @@ const mcp = new index_js_1.Client({
 }, { capabilities: { sampling: {} } });
 const transport = new stdio_js_1.StdioClientTransport({
     command: "node",
-    args: ["build/server.js"],
+    args: ["build/usermcp/server.js"],
     stderr: "ignore", // blocks server errors from showing in client.
 });
 // Init for Gemini w/ API key:

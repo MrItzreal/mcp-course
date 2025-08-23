@@ -22,7 +22,7 @@ const mcp = new Client(
 
 const transport = new StdioClientTransport({
   command: "node",
-  args: ["build/server.js"],
+  args: ["build/usermcp/server.js"],
   stderr: "ignore", // blocks server errors from showing in client.
 });
 

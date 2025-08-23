@@ -1,13 +1,12 @@
 {
   "name": "mcp-course",
   "version": "1.0.0",
-  "main": "src/server.ts",
   "scripts": {
     "server:build": "tsc",
     "server:build:watch": "tsc --watch",
-    "server:dev": "tsx src/server.ts",
-    "server:inspect": "set DANGEROUSLY_OMIT_AUTH=true && npx @modelcontextprotocol/inspector npm run server:dev",
-    "client:dev": "tsx src/client.ts"
+    "usermcp:server:dev": "tsx src/usermcp/server.ts",
+    "usermcp:client:dev": "tsx src/usermcp/client.ts",
+    "usermcp:server:inspect": "set DANGEROUSLY_OMIT_AUTH=true && npx @modelcontextprotocol/inspector npm run usermcp:server:dev"
   },
   "keywords": [],
   "author": "",
