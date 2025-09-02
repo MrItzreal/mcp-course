@@ -154,13 +154,32 @@ server.prompt("generate-fake-user", "Generate a fake user based on a given name"
         ],
     };
 });
+// Normalize data when random users are created:
+function normalizeUser(user) {
+    let name = user.name;
+    if (!name && user.firstName && user.lastName) {
+        name = `${user.firstName} ${user.lastName}`;
+    }
+    let address = user.address;
+    if (typeof address === "object" && address !== null) {
+        address = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`;
+    }
+    let phone = user.phone || user.phoneNumber;
+    return {
+        name: name || "",
+        email: user.email || "",
+        address: address || "",
+        phone: phone || "",
+    };
+}
 // Create new user
 async function createUser(user) {
     const users = await import("./data/users.json", {
         with: { type: "json" },
     }).then((m) => m.default);
     const id = users.length + 1;
-    users.push({ id, ...user });
+    const normalizedUser = normalizeUser(user);
+    users.push({ id, ...normalizedUser });
     await promises_1.default.writeFile("./src/usermcp/data/users.json", JSON.stringify(users, null, 2));
     return id;
 }
