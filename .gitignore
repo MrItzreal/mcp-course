@@ -13,6 +13,7 @@ dist
 dist-ssr
 *.local
 credentials.json
+token.json
 
 # Editor directories and files
 .vscode/*

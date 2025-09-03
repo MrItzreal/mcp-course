@@ -1,9 +1,16 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import fs from "fs";
+import path from "path";
 
 const { google } = require("googleapis");
 process.loadEnvFile();
+
+// OAuth2 config
+const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
+const TOKEN_PATH = path.join(process.cwd(), "token.json");
+const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 
 // Creates an MCP server
 const server = new McpServer({
@@ -11,23 +18,53 @@ const server = new McpServer({
   version: "1.0.0",
 });
 
+// Get authenticated OAuth2 client
+async function getAuthenticatedClient() {
+  const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH, "utf8"));
+  const { client_id, client_secret, redirect_uris } = credentials.installed;
+
+  const oAuth2Client = new google.auth.OAuth2(
+    client_id,
+    client_secret,
+    redirect_uris[0]
+  );
+
+  // Load existing token
+  if (fs.existsSync(TOKEN_PATH)) {
+    const token = JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"));
+    oAuth2Client.setCredentials(token);
+
+    // Refresh tokens when expire
+    oAuth2Client.on("tokens", (tokens: any) => {
+      if (tokens.refresh_token) {
+        // Store new fresh token
+        const existingTokens = JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"));
+        const updatedTokens = { ...existingTokens, ...tokens };
+        fs.writeFileSync(TOKEN_PATH, JSON.stringify(updatedTokens));
+      }
+    });
+    return oAuth2Client;
+  }
+  throw new Error(
+    "No authentication token found. Please run the authorization flow first."
+  );
+}
+
 // Tool function to GET calendar events
 async function getMyCalendarDataByDate(date: string): Promise<{
   meetings?: string[];
   error?: string;
 }> {
-  const calendar = google.calendar({
-    version: "v3",
-    auth: process.env.GOOGLE_PUBLIC_API_KEY,
-  });
-
-  // Calculate the start/end of given date (UTC)
-  const start = new Date(date);
-  start.setUTCHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 1);
-
   try {
+    const auth = await getAuthenticatedClient();
+    const calendar = google.calendar({ version: "v3", auth });
+
+    // Calculate the start/end of given date (UTC)
+    const start = new Date(date);
+    start.setUTCHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + 1);
+
     const res = await calendar.events.list({
       calendarId: process.env.CALENDAR_ID,
       timeMin: start.toISOString(),
@@ -44,18 +81,12 @@ async function getMyCalendarDataByDate(date: string): Promise<{
       return `${event.summary} at ${startTime}${description}`;
     });
 
-    if (meetings.length > 0) {
-      return {
-        meetings,
-      };
-    } else {
-      return {
-        meetings: [],
-      };
-    }
+    return {
+      meetings: meetings.length > 0 ? meetings : [],
+    };
   } catch (err: any) {
     return {
-      error: err.message,
+      error: `Calendar access error: ${err.message}`,
     };
   }
 }
@@ -71,12 +102,10 @@ async function createCalendarEvent(
   eventId?: string;
   error?: string;
 }> {
-  const calendar = google.calendar({
-    version: "v3",
-    auth: process.env.GOOGLE_PUBLIC_API_KEY,
-  });
-
   try {
+    const auth = await getAuthenticatedClient();
+    const calendar = google.calendar({ version: "v3", auth });
+
     const event = {
       summary: title,
       description: description || "",
@@ -97,7 +126,7 @@ async function createCalendarEvent(
 
     return { success: true, eventId: res.data.id || undefined };
   } catch (err: any) {
-    return { error: err.message };
+    return { error: `Unable to create ever: ${err.message}` };
   }
 }
 
@@ -128,7 +157,6 @@ server.tool(
   "createCalendarEvent",
   "Create a new calendar event",
   {
-    description: z.string().optional().describe("Optional event description"),
     title: z.string().describe("Event title/summary"),
     startDateTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
       message:
@@ -138,6 +166,7 @@ server.tool(
       message:
         "Invalid end date format. Please provide ISO string (YYYY-MM-DDTHH:mm:ss).",
     }),
+    description: z.string().optional().describe("Optional event description"),
   },
   async ({
     title,
@@ -174,3 +203,8 @@ async function main() {
 }
 
 main();
+
+/*
+MCP server tool definition pattern:
+server.tool(name, description, schema, handler)
+*/

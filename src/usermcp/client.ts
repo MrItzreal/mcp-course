@@ -144,7 +144,7 @@ async function handleQuery(tools: Tool[]) {
         ...obj,
         [tool.name]: {
           description: tool.description,
-          parameters: jsonSchema(tool.inputSchema),
+          inputSchema: jsonSchema(tool.inputSchema),
           execute: async (args: Record<string, any>) => {
             return await mcp.callTool({
               name: tool.name,
