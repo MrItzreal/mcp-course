@@ -104,8 +104,19 @@ Before setting up this project, ensure you have:
    ```
 
 3. **Install additional required packages**:
+
    ```bash
    npm install googleapis
+   ```
+
+4. **Set up configuration files using provided examples**:
+
+   ```bash
+   # Copy example files (you'll fill in actual values later)
+   cp .env.example .env
+   cp credentials.example.json credentials.json
+
+   # Note: token.json will be created automatically during OAuth setup
    ```
 
 ## Google Cloud Console Setup
@@ -177,7 +188,14 @@ Here's how it works in this project:
 
 ### Step 1: Place Credentials File
 
-Ensure your `credentials.json` file is in the project root:
+Ensure your `credentials.json` file is in the project root. You can use the provided example as a template:
+
+```bash
+# Copy the example file and replace with your actual credentials
+cp credentials.example.json credentials.json
+```
+
+Your project structure should look like:
 
 ```
 mcp-course/
@@ -222,11 +240,18 @@ Copy: `4/0AeanS0ZS9-ABC123...` (everything between `code=` and `&scope`)
 
 ### Environment Variables
 
-Create a `.env` file in your project root:
+Create a `.env` file in your project root using the provided example:
+
+```bash
+# Copy the example file and replace with your actual values
+cp .env.example .env
+```
+
+Edit the `.env` file with your actual values:
 
 ```env
 # Your Google API key (for additional services if needed)
-GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_API_KEY=your_actual_gemini_api_key
 
 # Your calendar ID (usually your Gmail address)
 CALENDAR_ID=your-email@gmail.com
@@ -347,8 +372,11 @@ mcp-course/
 ├── .vscode/
 │   └── mcp.json              # VS Code MCP configuration
 ├── credentials.json          # OAuth2 app credentials (Git ignored)
+├── credentials.example.json  # Template for credentials file (Git tracked)
 ├── token.json               # User access tokens (Git ignored)
+├── token.example.json       # Template for token file (Git tracked)
 ├── .env                     # Environment variables (Git ignored)
+├── .env.example             # Template for environment file (Git tracked)
 ├── package.json             # Node.js dependencies and scripts
 └── tsconfig.json           # TypeScript configuration
 ```
@@ -357,9 +385,11 @@ mcp-course/
 
 - **`server.ts`**: Main server implementing MCP protocol and Google Calendar integration
 - **`auth-setup.ts`**: One-time authentication setup script
-- **`credentials.json`**: OAuth2 application credentials from Google Cloud Console
-- **`token.json`**: User's access and refresh tokens (created during auth setup)
+- **`credentials.json`**: OAuth2 application credentials from Google Cloud Console (use credentials.example.json as template)
+- **`token.json`**: User's access and refresh tokens (created during auth setup, see token.example.json for structure)
+- **`.env`**: Environment variables for configuration (use .env.example as template)
 - **`mcp.json`**: Configuration for VS Code MCP extension
+- **`*.example.*` files**: Templates for sensitive files that are Git ignored
 
 ## Dependencies
 

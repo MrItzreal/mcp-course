@@ -1,0 +1,8 @@
+{
+  "access_token": "ya29.a0ASample_AccessTokenFromGoogleOAuth2_VeryLongString123456789",
+  "refresh_token": "1//05Sample_RefreshTokenFromGoogleOAuth2_AnotherLongString987654321",
+  "scope": "https://www.googleapis.com/auth/calendar",
+  "token_type": "Bearer",
+  "refresh_token_expires_in": 604800,
+  "expiry_date": 1234567890123
+}
