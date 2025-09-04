@@ -6,8 +6,9 @@
     "server:build:watch": "tsc --watch",
     "usermcp:server:dev": "tsx src/usermcp/server.ts",
     "usermcp:client:dev": "tsx src/usermcp/client.ts",
-    "calendarmcp:server:dev": "tsx src/calendarmcp/server.ts",
     "usermcp:server:inspect": "set DANGEROUSLY_OMIT_AUTH=true && npx @modelcontextprotocol/inspector npm run usermcp:server:dev",
+    "calendarmcp:server:dev": "tsx src/calendarmcp/server.ts",
+    "calendarmcp:auth:setup": "tsx src/calendarmcp/auth-setup.ts",
     "calendarmcp:server:inspect": "set DANGEROUSLY_OMIT_AUTH=true && npx @modelcontextprotocol/inspector npm run calendarmcp:server:dev"
   },
   "keywords": [],

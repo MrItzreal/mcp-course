@@ -1,27 +1,56 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mcp_js_1 = require("@modelcontextprotocol/sdk/server/mcp.js");
 const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
 const zod_1 = require("zod");
-const googleapis_1 = require("googleapis");
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const { google } = require("googleapis");
 process.loadEnvFile();
+// OAuth2 config
+const CREDENTIALS_PATH = path_1.default.join(process.cwd(), "credentials.json");
+const TOKEN_PATH = path_1.default.join(process.cwd(), "token.json");
+const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 // Creates an MCP server
 const server = new mcp_js_1.McpServer({
     name: "Izzy's Calendar",
     version: "1.0.0",
 });
+// Get authenticated OAuth2 client
+async function getAuthenticatedClient() {
+    const credentials = JSON.parse(fs_1.default.readFileSync(CREDENTIALS_PATH, "utf8"));
+    const { client_id, client_secret, redirect_uris } = credentials.installed;
+    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+    // Load existing token
+    if (fs_1.default.existsSync(TOKEN_PATH)) {
+        const token = JSON.parse(fs_1.default.readFileSync(TOKEN_PATH, "utf8"));
+        oAuth2Client.setCredentials(token);
+        // Refresh tokens when expire
+        oAuth2Client.on("tokens", (tokens) => {
+            if (tokens.refresh_token) {
+                // Store new fresh token
+                const existingTokens = JSON.parse(fs_1.default.readFileSync(TOKEN_PATH, "utf8"));
+                const updatedTokens = { ...existingTokens, ...tokens };
+                fs_1.default.writeFileSync(TOKEN_PATH, JSON.stringify(updatedTokens));
+            }
+        });
+        return oAuth2Client;
+    }
+    throw new Error("No authentication token found. Please run the authorization flow first.");
+}
 // Tool function to GET calendar events
 async function getMyCalendarDataByDate(date) {
-    const calendar = googleapis_1.google.calendar({
-        version: "v3",
-        auth: process.env.GOOGLE_PUBLIC_API_KEY,
-    });
-    // Calculate the start/end of given date (UTC)
-    const start = new Date(date);
-    start.setUTCHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setUTCDate(end.getUTCDate() + 1);
     try {
+        const auth = await getAuthenticatedClient();
+        const calendar = google.calendar({ version: "v3", auth });
+        // Calculate the start/end of given date (UTC)
+        const start = new Date(date);
+        start.setUTCHours(0, 0, 0, 0);
+        const end = new Date(start);
+        end.setUTCDate(end.getUTCDate() + 1);
         const res = await calendar.events.list({
             calendarId: process.env.CALENDAR_ID,
             timeMin: start.toISOString(),
@@ -36,30 +65,21 @@ async function getMyCalendarDataByDate(date) {
             const description = event.description ? `- ${event.description}` : "";
             return `${event.summary} at ${startTime}${description}`;
         });
-        if (meetings.length > 0) {
-            return {
-                meetings,
-            };
-        }
-        else {
-            return {
-                meetings: [],
-            };
-        }
+        return {
+            meetings: meetings.length > 0 ? meetings : [],
+        };
     }
     catch (err) {
         return {
-            error: err.message,
+            error: `Calendar access error: ${err.message}`,
         };
     }
 }
 // Tool function to create events
 async function createCalendarEvent(title, startDateTime, endDateTime, description) {
-    const calendar = googleapis_1.google.calendar({
-        version: "v3",
-        auth: process.env.GOOGLE_PUBLIC_API_KEY,
-    });
     try {
+        const auth = await getAuthenticatedClient();
+        const calendar = google.calendar({ version: "v3", auth });
         const event = {
             summary: title,
             description: description || "",
@@ -79,7 +99,7 @@ async function createCalendarEvent(title, startDateTime, endDateTime, descriptio
         return { success: true, eventId: res.data.id || undefined };
     }
     catch (err) {
-        return { error: err.message };
+        return { error: `Unable to create ever: ${err.message}` };
     }
 }
 // Tool config
@@ -100,7 +120,6 @@ server.tool("getMyCalendarDataByDate", "Get calendar events for a specific date"
 });
 // Tool config
 server.tool("createCalendarEvent", "Create a new calendar event", {
-    description: zod_1.z.string().optional().describe("Optional event description"),
     title: zod_1.z.string().describe("Event title/summary"),
     startDateTime: zod_1.z.string().refine((val) => !isNaN(Date.parse(val)), {
         message: "Invalid start date format. Please provide ISO string (YYYY-MM-DDTHH:mm:ss).",
@@ -108,6 +127,7 @@ server.tool("createCalendarEvent", "Create a new calendar event", {
     endDateTime: zod_1.z.string().refine((val) => !isNaN(Date.parse(val)), {
         message: "Invalid end date format. Please provide ISO string (YYYY-MM-DDTHH:mm:ss).",
     }),
+    description: zod_1.z.string().optional().describe("Optional event description"),
 }, async ({ title, startDateTime, endDateTime, description, }) => {
     const result = await createCalendarEvent(title, startDateTime, endDateTime, description);
     return {
@@ -125,3 +145,7 @@ async function main() {
     await server.connect(transport);
 }
 main();
+/*
+MCP server tool definition pattern:
+server.tool(name, description, schema, handler)
+*/
