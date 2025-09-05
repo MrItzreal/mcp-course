@@ -23,6 +23,7 @@ async function getAuthenticatedClient() {
   const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH, "utf8"));
   const { client_id, client_secret, redirect_uris } = credentials.installed;
 
+  // Init a client w/ the credentials
   const oAuth2Client = new google.auth.OAuth2(
     client_id,
     client_secret,
@@ -50,7 +51,7 @@ async function getAuthenticatedClient() {
   );
 }
 
-// Tool function to GET calendar events
+// Function to GET calendar events
 async function getMyCalendarDataByDate(date: string): Promise<{
   meetings?: string[];
   error?: string;
@@ -91,7 +92,7 @@ async function getMyCalendarDataByDate(date: string): Promise<{
   }
 }
 
-// Tool function to create events
+// Function to create events
 async function createCalendarEvent(
   title: string,
   startDateTime: string,
@@ -126,7 +127,7 @@ async function createCalendarEvent(
 
     return { success: true, eventId: res.data.id || undefined };
   } catch (err: any) {
-    return { error: `Unable to create ever: ${err.message}` };
+    return { error: `Unable to create event: ${err.message}` };
   }
 }
 
@@ -206,5 +207,15 @@ main();
 
 /*
 MCP server tool definition pattern:
-server.tool(name, description, schema, handler)
+server.tool(name, description, Zod schema, handler function)
+
+Long example:
+title: "Going for dinner w/ wife",
+startDateTime: "2025-09-23T18:00:00",
+endDateTime: "2025-09-23T20:00:00",
+description: "Have dinner at fav restaurant."
+
+Natural language:
+#createCalendarEvent 
+Going for dinner with my wife on September 23 from 6pm to 8pm
 */

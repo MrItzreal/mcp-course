@@ -18,6 +18,7 @@ async function setupAuth() {
   const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH, "utf8"));
   const { client_secret, client_id, redirect_uris } = credentials.installed;
 
+  // Init a client w/ the credentials
   const oAuth2Client = new google.auth.OAuth2(
     client_id,
     client_secret,
