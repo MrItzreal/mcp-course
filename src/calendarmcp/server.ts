@@ -211,11 +211,11 @@ server.tool(name, description, Zod schema, handler function)
 
 Long example:
 title: "Going for dinner w/ wife",
-startDateTime: "2025-09-23T18:00:00",
-endDateTime: "2025-09-23T20:00:00",
+startDateTime: "2025-10-10T18:00:00",
+endDateTime: "2025-10-10T20:00:00",
 description: "Have dinner at fav restaurant."
 
 Natural language:
 #createCalendarEvent 
-Going for dinner with my wife on September 23 from 6pm to 8pm
+Going for dinner with my wife on October 10 from 6pm to 8pm
 */
