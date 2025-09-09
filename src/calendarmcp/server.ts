@@ -16,6 +16,7 @@ const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 const server = new McpServer({
   name: "Izzy's Calendar",
   version: "1.0.0",
+  capabilities: { tools: {} },
 });
 
 // Get authenticated OAuth2 client
@@ -140,6 +141,11 @@ server.tool(
       message: "Invalid date format. Please provide a valid date string.",
     }),
   },
+  {
+    // Meta data for client:
+    title: "Get Calendar Events",
+    readOnlyHint: true,
+  },
   async ({ date }: { date: string }) => {
     const result = await getMyCalendarDataByDate(date);
     return {
@@ -168,6 +174,14 @@ server.tool(
         "Invalid end date format. Please provide ISO string (YYYY-MM-DDTHH:mm:ss).",
     }),
     description: z.string().optional().describe("Optional event description"),
+  },
+  {
+    // Meta data for client:
+    title: "Create Calendar Events",
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
   },
   async ({
     title,

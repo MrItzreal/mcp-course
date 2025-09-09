@@ -94,6 +94,7 @@ server.tool(
     phone: z.string(),
   },
   {
+    // Meta data for client:
     title: "Create User",
     readOnlyHint: false,
     destructiveHint: false,
@@ -120,6 +121,7 @@ server.tool(
   "create-random-user",
   "Create a random user with fake data",
   {
+    // Meta data for client:
     title: "Create Random User",
     readOnlyHint: false,
     destructiveHint: false,
