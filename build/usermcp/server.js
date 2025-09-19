@@ -75,6 +75,7 @@ server.tool("create-user", "Create a new user in the database", {
     address: zod_1.z.string(),
     phone: zod_1.z.string(),
 }, {
+    // Meta data for client:
     title: "Create User",
     readOnlyHint: false,
     destructiveHint: false,
@@ -95,6 +96,7 @@ server.tool("create-user", "Create a new user in the database", {
 });
 // Sampling config
 server.tool("create-random-user", "Create a random user with fake data", {
+    // Meta data for client:
     title: "Create Random User",
     readOnlyHint: false,
     destructiveHint: false,

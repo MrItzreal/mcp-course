@@ -47,18 +47,5 @@
     "email": "john.doe@example.com",
     "address": "123 Main Street, Anytown, USA",
     "phone": "+1-555-123-4567"
-  },
-  {
-    "id": 8,
-    "firstName": "Eleanor",
-    "lastName": "Vance",
-    "email": "eleanor.vance74@example.com",
-    "address": {
-      "street": "456 Oak Avenue",
-      "city": "Springfield",
-      "state": "IL",
-      "zipCode": "62704"
-    },
-    "phoneNumber": "217-555-8901"
   }
 ]

@@ -18,11 +18,13 @@ const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 const server = new mcp_js_1.McpServer({
     name: "Izzy's Calendar",
     version: "1.0.0",
+    capabilities: { tools: {} },
 });
 // Get authenticated OAuth2 client
 async function getAuthenticatedClient() {
     const credentials = JSON.parse(fs_1.default.readFileSync(CREDENTIALS_PATH, "utf8"));
     const { client_id, client_secret, redirect_uris } = credentials.installed;
+    // Init a client w/ the credentials
     const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
     // Load existing token
     if (fs_1.default.existsSync(TOKEN_PATH)) {
@@ -41,7 +43,7 @@ async function getAuthenticatedClient() {
     }
     throw new Error("No authentication token found. Please run the authorization flow first.");
 }
-// Tool function to GET calendar events
+// Function to GET calendar events
 async function getMyCalendarDataByDate(date) {
     try {
         const auth = await getAuthenticatedClient();
@@ -75,7 +77,7 @@ async function getMyCalendarDataByDate(date) {
         };
     }
 }
-// Tool function to create events
+// Function to create events
 async function createCalendarEvent(title, startDateTime, endDateTime, description) {
     try {
         const auth = await getAuthenticatedClient();
@@ -99,7 +101,7 @@ async function createCalendarEvent(title, startDateTime, endDateTime, descriptio
         return { success: true, eventId: res.data.id || undefined };
     }
     catch (err) {
-        return { error: `Unable to create ever: ${err.message}` };
+        return { error: `Unable to create event: ${err.message}` };
     }
 }
 // Tool config
@@ -107,6 +109,10 @@ server.tool("getMyCalendarDataByDate", "Get calendar events for a specific date"
     date: zod_1.z.string().refine((val) => !isNaN(Date.parse(val)), {
         message: "Invalid date format. Please provide a valid date string.",
     }),
+}, {
+    // Meta data for client:
+    title: "Get Calendar Events",
+    readOnlyHint: true,
 }, async ({ date }) => {
     const result = await getMyCalendarDataByDate(date);
     return {
@@ -128,6 +134,13 @@ server.tool("createCalendarEvent", "Create a new calendar event", {
         message: "Invalid end date format. Please provide ISO string (YYYY-MM-DDTHH:mm:ss).",
     }),
     description: zod_1.z.string().optional().describe("Optional event description"),
+}, {
+    // Meta data for client:
+    title: "Create Calendar Events",
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
 }, async ({ title, startDateTime, endDateTime, description, }) => {
     const result = await createCalendarEvent(title, startDateTime, endDateTime, description);
     return {
@@ -147,5 +160,15 @@ async function main() {
 main();
 /*
 MCP server tool definition pattern:
-server.tool(name, description, schema, handler)
+server.tool(name, description, Zod schema, handler function)
+
+Long example:
+title: "Going for dinner w/ wife",
+startDateTime: "2025-10-10T18:00:00",
+endDateTime: "2025-10-10T20:00:00",
+description: "Have dinner at fav restaurant."
+
+Natural language:
+#createCalendarEvent
+Going for dinner with my wife on October 10 from 6pm to 8pm
 */
